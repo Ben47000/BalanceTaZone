@@ -4,7 +4,7 @@ const initialState = {
 	username: "",
 	isLogged: false,
 	msg: "",
-	role: "user", 
+	role: "0", 
 	authError: null, 
 };
 
@@ -14,19 +14,21 @@ const userSlice = createSlice({
 	reducers: {
 		login(state, action) {
 			console.log("action.payload", action.payload);
-			state.username = action.payload.user.username;
+			state.firstname = action.payload.user.firstname;
 			state.isLogged = action.payload.isLogged;
-			state.role = action.payload.user.role || "user"; 
+			state.role = action.payload.user.role || "0"; 
 			state.authError = null;
 		},
 		loginFailed(state, action) {
 			state.authError = action.payload.error;
 		},
-		logout(state, action) {
+		logout(state) {
 			state.username = "";
-			state.isLogged = action.payload.isLogged;
-			state.role = "user";
+			state.isLogged = false;  
+			state.role = "0";
+			state.authError = null;  
 		},
+		
 		setLoading(state, action) {
 			state.isLoading = action.payload;
 		},
@@ -34,7 +36,7 @@ const userSlice = createSlice({
 			state.msg = action.payload;
 		},
 		updateField(state, action) {
-			state.username = action.payload.username;
+			state.firstname = action.payload.username;
 		},
 	},
 });
