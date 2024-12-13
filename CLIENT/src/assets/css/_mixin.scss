@@ -1,0 +1,20 @@
+// Définir le mixin media-breakpoints-up
+@mixin media-breakpoints-up($breakpoint) {
+  // Définir un point de rupture pour mobile
+  @if $breakpoint == 'mobile' {
+    @media (min-width: 576px) {
+      @content;
+    }
+  }
+  // Vous pouvez ajouter d'autres points de rupture si nécessaire
+  @else if $breakpoint == 'tablet' {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+  @else if $breakpoint == 'desktop' {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+}

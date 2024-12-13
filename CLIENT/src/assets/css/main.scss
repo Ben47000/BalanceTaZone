@@ -1,0 +1,18 @@
+// Importations des fichiers de réinitialisation et de base
+@use "reset";      // Reset global (si vous avez un fichier reset.scss)
+@use "base";       // Base styles, comme les styles généraux de la page
+
+// Import des variables globales
+@use 'variable';   // Import des variables globales
+
+// Import des mixins
+@use 'mixin';      // Import des mixins
+@use 'breakpoint';
+
+// Import des styles des composants spécifiques;
+@use 'header';     // Styles de l'en-tête
+@use 'map';        // Styles du composant de carte (si applicable)
+@use 'form';       // Styles des formulaires
+@use 'nav';
+@use 'footer';
+@use 'button';

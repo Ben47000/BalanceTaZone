@@ -60,7 +60,7 @@ const Signup = () => {
   return (
     <div className="signup-container">
       <h1>Créer un compte</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="form-container">
         <div>
           <label>Prénom :</label>
           <input

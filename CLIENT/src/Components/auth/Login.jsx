@@ -45,7 +45,7 @@ const Login = () => {
   return (
     <main>
       <h1>Connexion</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="form-container">
         <label htmlFor="email">Adresse email</label>
         <input
           type="email"
@@ -64,7 +64,7 @@ const Login = () => {
           required
         />
 
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p>{error}</p>}
 
         <button type="submit">Se connecter</button>
       </form>

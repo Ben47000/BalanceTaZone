@@ -1,0 +1,30 @@
+
+@use 'variable';
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-family: variable.$font-family;
+    font-size: variable.$font-size-base;
+    background-color: variable.$background-color;
+    color: variable.$text-color;
+  }
+  
+  body {
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+  
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  button {
+    cursor: pointer;
+  }
+  

@@ -1,0 +1,72 @@
+/* Base Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Remove bullets and default styles from lists */
+ul,
+ol {
+  list-style: none;
+}
+
+/* Reset link styles */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Set consistent body styles */
+body {
+  line-height: 1.5;
+  font-family: sans-serif;
+  background-color: #fff;
+  color: #000;
+}
+
+/* Remove default margin from headings */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+}
+
+/* Reset table styles */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td, th {
+  padding: 0;
+}
+
+/* Remove default form styles */
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+/* Reset images and media */
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Remove default button styles */
+button {
+  cursor: pointer;
+  background-color: transparent;
+}/*# sourceMappingURL=reset.css.map */

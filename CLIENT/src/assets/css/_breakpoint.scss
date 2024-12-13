@@ -1,0 +1,19 @@
+
+// Définition d'un mixin media-breakpoints-up pour les différents points de rupture
+@mixin media-breakpoints-up($breakpoint) {
+  @if $breakpoint == 'mobile' {
+    @media (min-width: 576px) {
+      @content;
+    }
+  }
+  @else if $breakpoint == 'tablet' {
+    @media (min-width: 768px) {
+      @content;
+    }
+  }
+  @else if $breakpoint == 'desktop' {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+}

@@ -1,0 +1,26 @@
+.map-container {
+  height: 100vh;
+  width: 80%;
+  margin: 20px;
+  text-align: center;
+}
+
+.buttons-container {
+  display: flex;
+  gap: 10px;
+  margin: 10px;
+}
+
+.buttons-container button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.buttons-container button:hover {
+  background-color: #0056b3;
+}

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L from "leaflet";
+import { useState, useEffect } from 'react'; // Importer useState et useEffect
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-// Icônes personnalisées pour les marqueurs
+// Configuration des icônes
 const eventIcon = new L.Icon({
   iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-red.png",
   iconSize: [25, 41],
@@ -14,7 +14,7 @@ const eventIcon = new L.Icon({
 });
 
 const reportIcon = new L.Icon({
-  iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png", // Icône différente pour les rapports
+  iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -22,71 +22,186 @@ const reportIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-function Map({ userLocation, events, setEvents, reports, setReports }) {
-  const [markerType, setMarkerType] = useState("event"); // Etat pour le type de marqueur
+// Composant pour ajouter un marqueur au clic sur la carte
+function AddMarkerOnClick({ setNewMarker }) {
+  const [marker, setMarker] = useState(null);
 
-  // Composant pour ajouter un marqueur lors du clic
-  function AddMarkerOnClick() {
-    useMapEvents({
-      click(e) {
-        const newMarker = {
-          id: Date.now(),
-          position: [e.latlng.lat, e.latlng.lng],
-          description: markerType === "event" ? "Nouvel événement signalé" : "Nouveau rapport signalé",
-          type: markerType, // Type de marqueur (event ou report)
-        };
+  useMapEvents({
+    click(event) {
+      const { lat, lng } = event.latlng;
+      setMarker([lat, lng]);
+      setNewMarker({ position: [lat, lng] }); // Mettre à jour le marqueur dans le parent
+    },
+  });
 
-        if (markerType === "event") {
-          setEvents((prevEvents) => [...prevEvents, newMarker]);
-          // Envoyer l'événement au serveur via une API (POST /api/events/create)
-        } else {
-          setReports((prevReports) => [...prevReports, newMarker]);
-          // Envoyer le rapport au serveur via une API (POST /api/reports/create)
-        }
-      },
-    });
+  return marker ? <Marker position={marker} /> : null;
+}
+
+function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
+  const [userLocation, setUserLocation] = useState([48.8566, 2.3522]); // Paris par défaut
+  const [markerType, setMarkerType] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [newMarker, setNewMarker] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(""); // Pour afficher un message d'erreur
+
+  // Récupération de la localisation de l'utilisateur
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => setUserLocation([position.coords.latitude, position.coords.longitude]),
+        () => setUserLocation([48.8566, 2.3522]) // En cas d'échec, localisation par défaut
+      );
+    } else {
+      setUserLocation([48.8566, 2.3522]); // Localisation par défaut si géolocalisation non supportée
+    }
+  }, []);
+
+  // Gestion du formulaire d'ajout
+  const handleFormSubmit = (event) => {
+    event.preventDefault();
+
+    // Vérifier que le marqueur est défini avant de soumettre
+    if (!newMarker) {
+      setErrorMessage("Vous devez d'abord cliquer sur la carte pour ajouter un marqueur.");
+      return;
+    }
+
+    const formData = new FormData(event.target);
+
+    if (markerType === "event") {
+      const newEvent = {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        eventDate: formData.get("eventDate"),
+        location: formData.get("location"),
+        position: newMarker.position,
+        type: "event",
+        user_id: 1, // Exemple d'id utilisateur, à adapter selon ton système
+      };
+      setEvents([...events, newEvent]);
+    } else if (markerType === "report") {
+      const newReport = {
+        description: formData.get("description"),
+        publishDate: formData.get("publishDate"),
+        area_id: formData.get("area_id"),
+        category_id: formData.get("category_id"),
+        user_id: 1, // Exemple d'id utilisateur, à adapter
+        authority_id: formData.get("authority_id"),
+        statut: formData.get("statut"),
+        position: newMarker.position,
+        type: "report",
+      };
+      setReports([...reports, newReport]);
+    }
+
+    setNewMarker(null);
+    setShowForm(false);
+    setMarkerType(null);
+    setErrorMessage(""); // Réinitialiser le message d'erreur
+  };
+
+  const getIconForType = (type) => {
+    if (type === "event") return eventIcon;
+    if (type === "report") return reportIcon;
     return null;
-  }
+  };
 
   return (
     <div>
-      <button onClick={() => setMarkerType("event")}>Ajouter un événement</button>
-      <button onClick={() => setMarkerType("report")}>Ajouter un rapport</button>
+      {isLogged && (
+        <div className="add-button-container">
+          <button  onClick={() => { setMarkerType("event"); setShowForm(true); }}>Ajouter un événement</button>
+          <button  onClick={() => { setMarkerType("report"); setShowForm(true); }}>Ajouter un rapport</button>
+        </div>
+      )}
 
-      <MapContainer
-        center={userLocation || [48.8566, 2.3522]}
-        zoom={13}
-        style={{ height: "100vh", width: "100%" }} // correction de la propriété de style
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+      {/* Affichage du message d'erreur si besoin */}
+      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
 
-        {/* Marqueurs utilisateur */}
-        {userLocation && (
-          <Marker position={userLocation} icon={eventIcon}>
-            <Popup>Vous êtes ici</Popup>
-          </Marker>
-        )}
+      <MapContainer center={userLocation} zoom={13} style={{ height: "500px", width: "100%" }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <AddMarkerOnClick setNewMarker={setNewMarker} />
 
-        {/* Marqueurs des événements */}
-        {Array.isArray(events) && events.map((event) => (
-          <Marker key={event.id} position={event.position} icon={eventIcon}>
-            <Popup>{event.description}</Popup>
-          </Marker>
+        {/* Affichage des événements */}
+        {Array.isArray(events) && events.map((event, index) => (
+          event.position ? (
+            <Marker key={index} position={event.position} icon={getIconForType(event.type)}>
+              <Popup>
+                <h3>{event.name}</h3>
+                <p>{event.description}</p>
+                <p>Date: {event.eventDate || "Non spécifiée"}</p>
+                <button onClick={() => alert(`Participation à l'événement ${event.name}`)}>Participer</button>
+              </Popup>
+            </Marker>
+          ) : null
         ))}
 
-        {/* Marqueurs des rapports */}
-        {Array.isArray(reports) && reports.map((report) => (
-          <Marker key={report.id} position={report.position} icon={reportIcon}>
-            <Popup>{report.description}</Popup>
-          </Marker>
+        {/* Affichage des rapports */}
+        {Array.isArray(reports) && reports.map((report, index) => (
+          report.position ? (
+            <Marker key={index} position={report.position} icon={getIconForType(report.type)}>
+              <Popup>
+                <h3>Rapport</h3>
+                <p>{report.description}</p>
+              </Popup>
+            </Marker>
+          ) : null
         ))}
-
-        {/* Activation de l'ajout de marqueurs */}
-        <AddMarkerOnClick />
       </MapContainer>
+
+      {/* Formulaire pour ajouter un événement ou un rapport */}
+      {showForm && (
+        <div className="form-container">
+          <form onSubmit={handleFormSubmit}>
+            <h3>Ajouter {markerType}</h3>
+
+            {markerType === "event" && (
+              <>
+                <label>
+                  Nom: <input type="text" name="name" required />
+                </label>
+                <label>
+                  Date: <input type="datetime-local" name="eventDate" required />
+                </label>
+                <label>
+                  Localisation: <input type="text" name="location" required />
+                </label>
+              </>
+            )}
+
+            {markerType === "report" && (
+              <>
+                <label>
+                  Description: <textarea name="description" required />
+                </label>
+                <label>
+                  Date de publication: <input type="datetime-local" name="publishDate" required />
+                </label>
+                <label>
+                  Zone: <input type="number" name="area_id" />
+                </label>
+                <label>
+                  Catégorie: <input type="number" name="category_id" />
+                </label>
+                <label>
+                  Autorité: <input type="number" name="authority_id" />
+                </label>
+                <label>
+                  Statut: 
+                  <select name="statut" required>
+                    <option value="Etude en cours">Etude en cours</option>
+                    <option value="Intervention en cours">Intervention en cours</option>
+                    <option value="Clôturé">Clôturé</option>
+                  </select>
+                </label>
+              </>
+            )}
+
+            <button type="submit">Créer</button>
+            <button type="button" onClick={() => setShowForm(false)}>Annuler</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

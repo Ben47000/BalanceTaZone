@@ -1,0 +1,19 @@
+// Couleurs principales
+$primary-color: #3C8D40; // Vert pour l'écologie
+$secondary-color: #A3A3A3;; // Orange pour les alertes
+$background-color: #F8F8F8;
+$text-color: #333333;
+
+// Breakpoints
+$breakpoints-mobile: 320px;
+$breakpoints-tablet: 768px;
+$breakpoints-desktop: 1024px;
+
+// Typographie
+$font-family: 'Arial', sans-serif;
+$font-size-base: 16px;
+
+// Espacements
+$spacing-small: 8px;
+$spacing-medium: 16px;  // Assurez-vous que cette variable est bien définie
+$spacing-large: 24px;

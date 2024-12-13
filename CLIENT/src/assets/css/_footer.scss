@@ -1,0 +1,73 @@
+
+@use 'variable';
+@use 'mixin' as *;
+
+.footerStyle {
+    background-color: variable.$background-color;
+    color: variable.$text-color;
+    padding: variable.$spacing-large 0;
+    text-align: center;
+  
+    .containerStyle {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      max-width: 1200px;
+      margin: 0 auto;
+  
+      @include media-breakpoints-up('tablet') {
+        flex-wrap: nowrap;
+      }
+    }
+  
+    .sectionStyle {
+      flex: 1;
+      margin: variable.$spacing-medium;
+      min-width: 200px;
+  
+      h4 {
+        font-size: 1.2rem;
+        color: variable.$primary-color;
+      }
+    }
+  
+    .listStyle {
+      list-style-type: none;
+      padding: 0;
+  
+      li {
+        margin-bottom: variable.$spacing-small;
+  
+        a {
+          color: variable.$secondary-color;
+          text-decoration: none;
+  
+          &:hover {
+            color: variable.$primary-color;
+          }
+        }
+      }
+    }
+  
+    .socialIconsStyle {
+      display: flex;
+      justify-content: center;
+      gap: variable.$spacing-small;
+  
+      .iconStyle {
+        font-size: 24px;
+        color: variable.$primary-color;
+        text-decoration: none;
+  
+        &:hover {
+          color: variable.$secondary-color;
+        }
+      }
+    }
+  
+    .copyrightStyle {
+      margin-top: variable.$spacing-large;
+      font-size: 14px;
+      color: lighten(variable.$text-color, 20%);
+    }
+  }
