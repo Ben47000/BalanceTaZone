@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'; // Importer useState et useEffect
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 // Configuration des icônes
 const eventIcon = new L.Icon({
@@ -30,7 +30,7 @@ function AddMarkerOnClick({ setNewMarker }) {
     click(event) {
       const { lat, lng } = event.latlng;
       setMarker([lat, lng]);
-      setNewMarker({ position: [lat, lng] }); // Mettre à jour le marqueur dans le parent
+      setNewMarker({ position: [lat, lng] });
     },
   });
 
@@ -39,28 +39,35 @@ function AddMarkerOnClick({ setNewMarker }) {
 
 function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
   const [userLocation, setUserLocation] = useState([48.8566, 2.3522]); // Paris par défaut
+  const [isLocationFetched, setIsLocationFetched] = useState(false);
   const [markerType, setMarkerType] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [newMarker, setNewMarker] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(""); // Pour afficher un message d'erreur
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // Récupération de la localisation de l'utilisateur
-  useEffect(() => {
+  // Demander la localisation utilisateur via un bouton
+  const requestUserLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => setUserLocation([position.coords.latitude, position.coords.longitude]),
-        () => setUserLocation([48.8566, 2.3522]) // En cas d'échec, localisation par défaut
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+          setIsLocationFetched(true);
+        },
+        (error) => {
+          console.error("Erreur de géolocalisation :", error.message);
+          setIsLocationFetched(true);
+        }
       );
     } else {
-      setUserLocation([48.8566, 2.3522]); // Localisation par défaut si géolocalisation non supportée
+      console.error("La géolocalisation n'est pas prise en charge par ce navigateur.");
+      setIsLocationFetched(true);
     }
-  }, []);
+  };
 
   // Gestion du formulaire d'ajout
   const handleFormSubmit = (event) => {
     event.preventDefault();
 
-    // Vérifier que le marqueur est défini avant de soumettre
     if (!newMarker) {
       setErrorMessage("Vous devez d'abord cliquer sur la carte pour ajouter un marqueur.");
       return;
@@ -76,7 +83,7 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
         location: formData.get("location"),
         position: newMarker.position,
         type: "event",
-        user_id: 1, // Exemple d'id utilisateur, à adapter selon ton système
+        user_id: 1,
       };
       setEvents([...events, newEvent]);
     } else if (markerType === "report") {
@@ -85,7 +92,7 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
         publishDate: formData.get("publishDate"),
         area_id: formData.get("area_id"),
         category_id: formData.get("category_id"),
-        user_id: 1, // Exemple d'id utilisateur, à adapter
+        user_id: 1,
         authority_id: formData.get("authority_id"),
         statut: formData.get("statut"),
         position: newMarker.position,
@@ -97,7 +104,7 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
     setNewMarker(null);
     setShowForm(false);
     setMarkerType(null);
-    setErrorMessage(""); // Réinitialiser le message d'erreur
+    setErrorMessage("");
   };
 
   const getIconForType = (type) => {
@@ -108,53 +115,63 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
 
   return (
     <div>
+      {/* Bouton pour demander la géolocalisation */}
+      {!isLocationFetched && (
+        <button onClick={requestUserLocation}>Activer la géolocalisation</button>
+      )}
+
       {isLogged && (
         <div className="add-button-container">
-          <button  onClick={() => { setMarkerType("event"); setShowForm(true); }}>Ajouter un événement</button>
-          <button  onClick={() => { setMarkerType("report"); setShowForm(true); }}>Ajouter un rapport</button>
+          <button onClick={() => { setMarkerType("event"); setShowForm(true); }}>
+            Ajouter un événement
+          </button>
+          <button onClick={() => { setMarkerType("report"); setShowForm(true); }}>
+            Ajouter un rapport
+          </button>
         </div>
       )}
 
-      {/* Affichage du message d'erreur si besoin */}
-      {errorMessage && <div style={{ color: 'red' }}>{errorMessage}</div>}
+      {errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
 
       <MapContainer center={userLocation} zoom={13} style={{ height: "500px", width: "100%" }}>
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         <AddMarkerOnClick setNewMarker={setNewMarker} />
 
         {/* Affichage des événements */}
-        {Array.isArray(events) && events.map((event, index) => (
-          event.position ? (
-            <Marker key={index} position={event.position} icon={getIconForType(event.type)}>
-              <Popup>
-                <h3>{event.name}</h3>
-                <p>{event.description}</p>
-                <p>Date: {event.eventDate || "Non spécifiée"}</p>
-                <button onClick={() => alert(`Participation à l'événement ${event.name}`)}>Participer</button>
-              </Popup>
-            </Marker>
-          ) : null
-        ))}
+        {Array.isArray(events) &&
+          events.map((event, index) => (
+            event.position && (
+              <Marker key={index} position={event.position} icon={getIconForType(event.type)}>
+                <Popup>
+                  <h3>{event.name}</h3>
+                  <p>{event.description}</p>
+                  <p>Date: {event.eventDate || "Non spécifiée"}</p>
+                  <button onClick={() => alert(`Participation à l'événement ${event.name}`)}>
+                    Participer
+                  </button>
+                </Popup>
+              </Marker>
+            )
+          ))}
 
         {/* Affichage des rapports */}
-        {Array.isArray(reports) && reports.map((report, index) => (
-          report.position ? (
-            <Marker key={index} position={report.position} icon={getIconForType(report.type)}>
-              <Popup>
-                <h3>Rapport</h3>
-                <p>{report.description}</p>
-              </Popup>
-            </Marker>
-          ) : null
-        ))}
+        {Array.isArray(reports) &&
+          reports.map((report, index) => (
+            report.position && (
+              <Marker key={index} position={report.position} icon={getIconForType(report.type)}>
+                <Popup>
+                  <h3>Rapport</h3>
+                  <p>{report.description}</p>
+                </Popup>
+              </Marker>
+            )
+          ))}
       </MapContainer>
 
-      {/* Formulaire pour ajouter un événement ou un rapport */}
       {showForm && (
         <div className="form-container">
           <form onSubmit={handleFormSubmit}>
             <h3>Ajouter {markerType}</h3>
-
             {markerType === "event" && (
               <>
                 <label>
@@ -168,7 +185,6 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
                 </label>
               </>
             )}
-
             {markerType === "report" && (
               <>
                 <label>
@@ -187,7 +203,7 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
                   Autorité: <input type="number" name="authority_id" />
                 </label>
                 <label>
-                  Statut: 
+                  Statut:
                   <select name="statut" required>
                     <option value="Etude en cours">Etude en cours</option>
                     <option value="Intervention en cours">Intervention en cours</option>
@@ -196,7 +212,6 @@ function Map({ events = [], setEvents, reports = [], setReports, isLogged }) {
                 </label>
               </>
             )}
-
             <button type="submit">Créer</button>
             <button type="button" onClick={() => setShowForm(false)}>Annuler</button>
           </form>

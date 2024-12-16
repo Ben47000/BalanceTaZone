@@ -1,4 +1,4 @@
-import useCheckAuth from "./Components/Hook/useCheckAuth.jsx"
+import useCheckAuth from "./Hook/useCheckAuth";
 import UserRouter from "./Router/UserRouter";
 
 function App() {

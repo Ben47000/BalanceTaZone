@@ -2,7 +2,7 @@ import { useState } from "react"; // Gestion des états locaux
 import { useNavigate } from "react-router-dom"; // Navigation après l'inscription
 import { useDispatch } from "react-redux"; // Gestion des états globaux
 import { setMsg } from "../../store/Slices/user"; // Action Redux pour afficher un message
-import useCloseMenu from "../Hook/useCloseMenu"; // Hook pour fermer le menu (si nécessaire)
+import useCloseMenu from "../../Hook/useCloseMenu.jsx"; // Hook pour fermer le menu (si nécessaire)
 
 const Signup = () => {
   useCloseMenu(); // Ferme le menu latéral si ouvert

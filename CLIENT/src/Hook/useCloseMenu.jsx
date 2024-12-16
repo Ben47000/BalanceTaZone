@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { toggleMenu } from "../../store/Slices/menu.js";
+import { toggleMenu } from "../store/Slices/menu.js";
 import { useDispatch, useSelector } from "react-redux";
 
 function useCloseMenu() {
