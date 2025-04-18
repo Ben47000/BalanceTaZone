@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  id: null,               // Identifiant unique de l'utilisateur
-  firstname: "",          // Prénom
-  lastname: "",           // Nom de famille
-  email: "",              // E-mail
-  role: 0,                // Rôle (0 = citoyen, 1 = admin)
-  isLogged: false,        // Statut de connexion
-  authError: null,        // Erreur d'authentification
+  id: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).id : null,
+  firstname: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).firstname : "",
+  lastname: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).lastname : "",
+  email: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).email : "",
+  role: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")).role : 0,
+  isLogged: localStorage.getItem("user") ? true : false,
+  authError: null,
 };
 
 const userSlice = createSlice({
@@ -15,17 +15,26 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     login(state, action) {
-      console.log("action.payload", action.payload);
       state.id = action.payload.user.id;
       state.firstname = action.payload.user.firstname;
       state.lastname = action.payload.user.lastname;
       state.email = action.payload.user.email;
-      state.role = action.payload.user.role || 0;  // Par défaut, rôle citoyen (0)
+      state.role = action.payload.user.role;
       state.isLogged = true;
-      state.authError = null; // Réinitialise les erreurs
+      state.authError = null;
+      localStorage.setItem("user", JSON.stringify(action.payload.user));
+    },
+    setUser(state, action) { // ✅ Correction : Ajout de setUser
+      state.id = action.payload.id;
+      state.firstname = action.payload.firstname;
+      state.lastname = action.payload.lastname;
+      state.email = action.payload.email;
+      state.role = action.payload.role;
+      state.isLogged = true;
+      localStorage.setItem("user", JSON.stringify(action.payload));
     },
     loginFailed(state, action) {
-      state.authError = action.payload.error;  // Gère les erreurs d'authentification
+      state.authError = action.payload.error;
     },
     logout(state) {
       state.id = null;
@@ -33,8 +42,9 @@ const userSlice = createSlice({
       state.lastname = "";
       state.email = "";
       state.role = 0;
-      state.isLogged = false;  // Déconnecte l'utilisateur
-      state.authError = null;  // Réinitialise les erreurs
+      state.isLogged = false;
+      state.authError = null;
+      localStorage.removeItem("user");
     },
     setLoading(state, action) {
       state.isLoading = action.payload;
@@ -45,12 +55,5 @@ const userSlice = createSlice({
   },
 });
 
-export const {
-  login,
-  loginFailed,
-  logout,
-  setLoading,
-  setMsg,
-} = userSlice.actions;
-
+export const { login, setUser, loginFailed, logout, setLoading, setMsg } = userSlice.actions;
 export default userSlice.reducer;

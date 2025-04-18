@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../store/Slices/user";
+import { login, logout } from "../store/Slices/user";
 import { useNavigate } from "react-router-dom";
 
 function useCheckAuth() {
@@ -11,43 +11,36 @@ function useCheckAuth() {
 
   useEffect(() => {
     async function fetchAuthentication() {
-      // simule une latence de 1 seconde pour voir le chargement en localhost
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 1000);
-      });
       try {
-        const response = await fetch("/api/v1/user/check-auth", {
-          // dans la requête on envoie les cookies pour que le serveur puisse s'en servir afin de vérifier l'état de connexion
+        const response = await fetch("http://localhost:9000/api/v1/user/check-auth", {
           credentials: "include",
         });
-        // on envoi un 401 depuis le serveur en JSON si c'est le cas "utilisateur non connecté on stoppe la fonction avec un return"
+
         if (response.status === 401) {
-          console.log("utilisateur non connecté sur le serveur");
-          navigate("/");
+          console.warn("🔴 Utilisateur non connecté");
+          dispatch(logout()); // Déconnecter proprement l'utilisateur
+          setIsLoading(false);
           return;
         }
-        // si la réponse est ok, on récupère les données de l'utilisateur envoyé en JSON qu'on parse et on les stocke dans le state setUser, qui est un state d'un context User
-        if (response.ok) {
-          const data = await response.json();
-          dispatch(login(data));
-        } else {
-          console.log(`Server error: ${response.status}`);
+
+        if (!response.ok) {
+          console.error(`🛑 Erreur serveur: ${response.status} - ${response.statusText}`);
+          setIsLoading(false);
+          return;
         }
+
+        const data = await response.json();
+        dispatch(login(data));
+        console.log("✅ Utilisateur authentifié :", data);
       } catch (error) {
-        console.log(`Fetch error: ${error.message}`);
+        console.error("⚠️ Erreur de connexion :", error.message);
       } finally {
-        // le finally est utilisé afin d'executer une/plusieurs instructions dans tous les cas de figure (succès, erreur, etc...)
-        // ici on arrête "le chargement" et on oriente vers le bon router
         setIsLoading(false);
       }
     }
-    // simuler une latence de 2 secondes pour voir le chargement en localhost
-     setTimeout(() => {
+
     fetchAuthentication();
-     }, 2000);
-  }, []);
+  }, [dispatch]);
 
   return [user, isLoading];
 }

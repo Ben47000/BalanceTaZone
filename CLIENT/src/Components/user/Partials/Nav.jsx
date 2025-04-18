@@ -10,37 +10,34 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useNavigate, NavLink } from "react-router-dom";
 import { logout } from "../../../store/Slices/user";
-import { toggleMenu } from "../../../store/Slices/menu"; // Importation de l'action toggleMenu
+import { toggleMenu, closeMenu } from "../../../store/Slices/menu";
 
 function Nav() {
-  const user = useSelector((state) => state.user); // Utilisateur connecté
-  const menu = useSelector((state) => state.menu); // État du menu burger
+  const user = useSelector((state) => state.user);
+  const menu = useSelector((state) => state.menu);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [type, setType] = useState(
-    window.innerWidth > 600 ? "tabletAndMore" : "mobile"
-  );
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
-  // Écoute des changements de taille d'écran
+  // 📏 Gestion de la taille d'écran
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 600) {
-        setType("tabletAndMore");
-        dispatch(toggleMenu(false)); // Fermer le menu si on revient sur grand écran
+        setIsMobile(false);
+        dispatch(closeMenu()); // Fermer le menu burger
       } else {
-        setType("mobile");
+        setIsMobile(true);
       }
     };
 
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
     };
   }, [dispatch]);
 
-  // Gestion de la déconnexion
+  // 🚪 Déconnexion de l'utilisateur
   const onClickLogout = async () => {
     const response = await fetch("/api/v1/user/logout", {
       method: "POST",
@@ -50,22 +47,19 @@ function Nav() {
     if (response.status === 200) {
       dispatch(logout());
       navigate("/");
+      dispatch(closeMenu()); // 🔴 Fermer le menu après déconnexion
     } else {
       console.error("Erreur lors de la déconnexion :", response.status);
     }
   };
 
-  // Gestion de l'ouverture/fermeture du menu burger
-  const toggleBurgerMenu = () => {
-    dispatch(toggleMenu()); // Toggle de l'état du menu burger
-  };
-
   return (
     <>
-      {type === "mobile" && (
+      {/* 🔹 Bouton burger en mobile */}
+      {isMobile && (
         <button
           className={`burger-button ${menu.isOpen ? "active" : ""}`}
-          onClick={toggleBurgerMenu}
+          onClick={() => dispatch(toggleMenu())}
         >
           <span></span>
           <span></span>
@@ -73,19 +67,18 @@ function Nav() {
         </button>
       )}
 
-      <nav
-        className={`nav ${type === "mobile" && menu.isOpen ? "burger" : "screen"}`}
-      >
-        <NavLink to={"/"} className="nav-link">
+      {/* 🔹 Navigation */}
+      <nav className={`nav ${isMobile ? (menu.isOpen ? "burger" : "hidden") : "screen"}`}>
+        <NavLink to={"/"} className="nav-link" onClick={() => dispatch(closeMenu())}>
           <FontAwesomeIcon icon={faHome} /> Accueil
         </NavLink>
-        <NavLink to={"/contact"} className="nav-link">
+        <NavLink to={"/contact"} className="nav-link" onClick={() => dispatch(closeMenu())}>
           <FontAwesomeIcon icon={faEnvelope} /> Contact
         </NavLink>
 
         {user.isLogged ? (
           <>
-            <NavLink to={"/profil"} className="nav-link">
+            <NavLink to={"/profil"} className="nav-link" onClick={() => dispatch(closeMenu())}>
               <FontAwesomeIcon icon={faUser} /> Profil
             </NavLink>
             <button onClick={onClickLogout} className="nav-link logout-btn">
@@ -94,10 +87,10 @@ function Nav() {
           </>
         ) : (
           <>
-            <NavLink to={"/login"} className="nav-link">
+            <NavLink to={"/login"} className="nav-link" onClick={() => dispatch(closeMenu())}>
               <FontAwesomeIcon icon={faRightToBracket} /> Se connecter
             </NavLink>
-            <NavLink to={"/signup"} className="nav-link">
+            <NavLink to={"/signup"} className="nav-link" onClick={() => dispatch(closeMenu())}>
               <FontAwesomeIcon icon={faUser} /> S'inscrire
             </NavLink>
           </>

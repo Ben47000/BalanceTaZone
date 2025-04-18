@@ -5,7 +5,7 @@ const TermsOfService = () => {
     <div className="terms-container">
       <h1>Conditions d'utilisation</h1>
       
-      <p>Dernière mise à jour : [Date]</p>
+      <p>Dernière mise à jour : 16/12/2024</p>
 
       <section>
         <h2>1. Acceptation des conditions</h2>

@@ -9,7 +9,6 @@ function Header() {
     <header className="header">
       <div className="header-container">
         <Link to="/" className="logo-container">
-          <img src={logo} alt="Balance Ta Zone logo" className="header-logo" />
           <h1 className="header-title">Balance Ta Zone</h1>
         </Link>
         <Nav />

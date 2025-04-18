@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../store/Slices/user";
 import { toggleMenu } from "../../../store/Slices/menu";
 
-function Header() {
+function HeaderAdmin() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -16,7 +16,7 @@ function Header() {
 
     function onClickLogout() {
         async function fetchLogout() {
-            const response = await fetch("/api/v1/authentication/logout", {
+            const response = await fetch("/api/v1/user/logout", {
                 method: "POST",
                 credentials: "include",
             });
@@ -62,4 +62,4 @@ function Header() {
     );
 }
 
-export default Header;
+export default HeaderAdmin;

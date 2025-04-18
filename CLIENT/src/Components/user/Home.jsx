@@ -1,149 +1,210 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Pour rediriger en cas de déconnexion
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserEvents, addEvent } from "../../store/Slices/events.js";
+import { fetchReports, addReport } from "../../store/Slices/reports.js";
 import useCloseMenu from "../../Hook/useCloseMenu.jsx";
-import Map from "./Partials/Map.jsx";
 import WelcomeMessage from "./Partials/WelcomeMessage.jsx";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// ✅ Icônes personnalisés
+const eventIcon = new L.Icon({
+  iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-red.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const reportIcon = new L.Icon({
+  iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+// ✅ Composant pour capturer les clics et ajouter un marqueur
+function AddMarkerOnClick({ setNewMarker }) {
+  useMapEvents({
+    click(event) {
+      const { lat, lng } = event.latlng;
+      setNewMarker({ position: [lat, lng] });
+    },
+  });
+  return null;
+}
 
 function Home() {
-  useCloseMenu(); // Hook personnalisé pour gérer la fermeture des menus
+  useCloseMenu();
+  const dispatch = useDispatch();
 
-  const [events, setEvents] = useState([]); // État pour stocker les événements
-  const [reports, setReports] = useState([]); // État pour stocker les reportings
-  const [userLocation, setUserLocation] = useState(null); // Position de l'utilisateur
-  const [user, setUser] = useState(null); // Stockage des données utilisateur
-  const [isLogged, setIsLogged] = useState(false); // État pour vérifier la connexion
-  const [loading, setLoading] = useState(true); // Pour gérer le chargement initial
-  const navigate = useNavigate(); // Navigateur pour redirection
+  // ✅ Récupération des données
+  const user = useSelector((state) => state.user);
+  const events = useSelector((state) => state.events?.userEvents) || [];
+  const reports = useSelector((state) => state.reports?.reports) || [];
 
-  // **Vérification de l'authentification de l'utilisateur**
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await fetch("/api/v1/user/check-auth", {
-          credentials: "include", // Inclure les cookies pour vérifier la session
-        });
-        if (response.ok) {
-          const { isLogged, user } = await response.json();
-          setIsLogged(isLogged); // Met à jour l'état de connexion
-          setUser(user); // Stocke les informations utilisateur
-        } else {
-          console.log("Utilisateur non connecté");
-          setIsLogged(false);
-        }
-      } catch (error) {
-        console.error("Erreur lors de la vérification de l'authentification :", error);
-        setIsLogged(false);
-      } finally {
-        setLoading(false); // Fin du chargement
-      }
-    };
+  // ✅ États de la carte et formulaire
+  const [userLocation, setUserLocation] = useState([48.8566, 2.3522]); // Paris par défaut
+  const [markerType, setMarkerType] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [newMarker, setNewMarker] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-    checkAuth();
-  }, []); // Exécuté au chargement
-
-  // **Récupération de la position de l'utilisateur**
+  // ✅ Activer la géolocalisation
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setUserLocation([
-            position.coords.latitude,
-            position.coords.longitude,
-          ]); // Met à jour la position de l'utilisateur
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
         },
-        (error) => {
-          console.error("Géolocalisation impossible :", error);
-          setUserLocation([48.8566, 2.3522]); // Position par défaut (Paris)
+        () => {
+          console.warn("⚠️ Géolocalisation refusée, position par défaut appliquée.");
         }
       );
-    } else {
-      console.log("La géolocalisation n'est pas supportée par ce navigateur.");
-      setUserLocation([48.8566, 2.3522]); // Position par défaut
     }
-  }, []); // Exécution au montage du composant
+  }, []);
 
-  // **Récupération des événements et reportings**
+  // ✅ Charger les événements et rapports
   useEffect(() => {
-    const fetchData = async () => {
+    if (user?.isLogged && user.id) {
+      dispatch(fetchUserEvents(user.id));
+      dispatch(fetchReports());
+    }
+  }, [dispatch, user?.isLogged, user?.id]);
+
+  // ✅ Gestion du formulaire d'ajout
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+    if (!newMarker) {
+      setErrorMessage("❌ Vous devez cliquer sur la carte pour ajouter un marqueur.");
+      return;
+    }
+
+    const formData = new FormData(event.target);
+    let dataToSend = null;
+
+    if (markerType === "event") {
+      dataToSend = {
+        name: formData.get("name"),
+        description: formData.get("description"),
+        date: formData.get("eventDate"),
+        location: newMarker.position.join(","), // ✅ Stocké en "lat,lng"
+        user_id: user.id,
+      };
       try {
-        const [eventsResponse, reportsResponse] = await Promise.all([
-          fetch("/api/v1/event/list"),
-          fetch("/api/v1/reporting/list"),
-        ]);
-
-        if (eventsResponse.ok && reportsResponse.ok) {
-          const eventsData = await eventsResponse.json();
-          const reportsData = await reportsResponse.json();
-          setEvents(eventsData);
-          setReports(reportsData);
-        } else {
-          console.error("Erreur lors de la récupération des données");
-        }
+        await dispatch(addEvent(dataToSend)).unwrap();
+        setSuccessMessage("✅ Événement ajouté avec succès !");
+        dispatch(fetchUserEvents(user.id)); // 🔄 Recharge les événements
       } catch (error) {
-        console.error("Erreur lors de la récupération des événements et reportings :", error);
+        setErrorMessage("❌ Erreur lors de l'ajout de l'événement.");
       }
-    };
-
-    if (isLogged) {
-      fetchData(); // Charger les données seulement si l'utilisateur est connecté
-    }
-  }, [isLogged]); // Dépend de l'état de connexion
-
-  // **Déconnexion de l'utilisateur**
-  const handleLogout = async () => {
-    try {
-      const response = await fetch("/api/v1/user/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (response.ok) {
-        setIsLogged(false);
-        setUser(null); // Réinitialiser les données utilisateur
-        navigate("/login"); // Redirection vers la page de connexion
-      } else {
-        console.error("Erreur lors de la déconnexion");
+    } else if (markerType === "report") {
+      dataToSend = {
+        description: formData.get("description"),
+        area_id: formData.get("area_id"),
+        category_id: formData.get("category_id"),
+        user_id: user.id,
+        autority_id: formData.get("autority_id"),
+        statut: formData.get("statut"),
+        position: newMarker.position.join(","), // ✅ Stocké en "lat,lng"
+      };
+      try {
+        await dispatch(addReport(dataToSend)).unwrap();
+        setSuccessMessage("✅ Rapport ajouté avec succès !");
+        dispatch(fetchReports()); // 🔄 Recharge les rapports
+      } catch (error) {
+        setErrorMessage("❌ Erreur lors de l'ajout du rapport.");
       }
-    } catch (error) {
-      console.error("Erreur lors de la tentative de déconnexion :", error);
     }
+
+    setNewMarker(null);
+    setShowForm(false);
+    setMarkerType(null);
+    setErrorMessage("");
   };
-
-  if (loading) {
-    return <p>Chargement...</p>; // Affichage pendant le chargement
-  }
 
   return (
     <main>
-      <section className="map">
-        {/* Affichage conditionnel pour l'utilisateur non connecté */}
-        {!isLogged ? (
-          <p>
-            Vous n'êtes pas connecté.{" "}
-            <a href="/login">Connectez-vous</a> pour accéder à la carte et aux fonctionnalités.
-          </p>
-        ) : (
-          <>
-            <WelcomeMessage user={user} onLogout={handleLogout} /> {/* Message de bienvenue avec bouton de déconnexion */}
-            
-            {/* Affichage conditionnel de la carte */}
-            {userLocation ? (
-              <Map
-                events={events}
-                setEvents={setEvents}
-                reports={reports}
-                setReports={setReports}
-                isLogged={isLogged} // Indique si l'utilisateur est connecté
-              />
-            ) : (
-              <p>Chargement de la carte...</p>
+      <WelcomeMessage />
+
+      {/* ✅ Messages utilisateur */}
+      {errorMessage && <div style={{ color: "red", textAlign: "center" }}>{errorMessage}</div>}
+      {successMessage && <div style={{ color: "green", textAlign: "center" }}>{successMessage}</div>}
+
+      {/* ✅ Si l'utilisateur n'est pas connecté */}
+      {!user?.isLogged && (
+        <div style={{ textAlign: "center", margin: "20px" }}>
+          <h2>Bienvenue sur notre site</h2>
+          <p>Veuillez vous connecter pour ajouter des événements et des rapports.</p>
+        </div>
+      )}
+
+      {/* ✅ Boutons d'ajout */}
+      {user?.isLogged && (
+        <div className="add-button-container">
+          <button onClick={() => { setMarkerType("event"); setShowForm(true); }}>Ajouter un événement</button>
+          <button onClick={() => { setMarkerType("report"); setShowForm(true); }}>Ajouter un rapport</button>
+        </div>
+      )}
+
+      <MapContainer center={userLocation} zoom={13} style={{ height: "500px", width: "100%" }}>
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <AddMarkerOnClick setNewMarker={setNewMarker} />
+
+        {/* ✅ Affichage des événements */}
+        {events.map((event, index) => (
+          event.location && (
+            <Marker key={index} position={event.location.split(",").map(Number)} icon={eventIcon}>
+              <Popup>
+                <h3>{event.name}</h3>
+                <p>{event.description}</p>
+                <button onClick={() => alert(`Participation à ${event.name}`)}>Participer</button>
+              </Popup>
+            </Marker>
+          )
+        ))}
+
+        {/* ✅ Affichage des rapports */}
+        {reports.map((report, index) => (
+          report.position && (
+            <Marker key={index} position={report.position.split(",").map(Number)} icon={reportIcon}>
+              <Popup>
+                <h3>Rapport</h3>
+                <p>{report.description}</p>
+              </Popup>
+            </Marker>
+          )
+        ))}
+      </MapContainer>
+
+      {/* ✅ Affichage du formulaire d'ajout */}
+      {showForm && (
+        <div className="form-container">
+          <form onSubmit={handleFormSubmit}>
+            <h3>Ajouter {markerType === "event" ? "un événement" : "un rapport"}</h3>
+
+            {markerType === "event" && (
+              <>
+                <label>Nom: <input type="text" name="name" required /></label>
+                <label>Date: <input type="datetime-local" name="eventDate" required /></label>
+                <label>Description: <textarea name="description" required /></label>
+              </>
             )}
 
-            {/* Affichage des messages si aucun événement ou reporting */}
-            {events.length === 0 && <p>Aucun événement à afficher.</p>}
-            {reports.length === 0 && <p>Aucun reporting à afficher.</p>}
-          </>
-        )}
-      </section>
+            {markerType === "report" && (
+              <>
+                <label>Description: <textarea name="description" required /></label>
+                <label>Zone: <input type="number" name="area_id" required /></label>
+                <label>Catégorie: <input type="number" name="category_id" required /></label>
+              </>
+            )}
+
+            <button type="submit">Créer</button>
+            <button type="button" onClick={() => setShowForm(false)}>Annuler</button>
+          </form>
+        </div>
+      )}
     </main>
   );
 }

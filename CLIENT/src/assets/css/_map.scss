@@ -1,14 +1,18 @@
-.map-container {
-  height: 100vh;
-  width: 80%;
-  margin: 20px;
-  text-align: center;
+// src/styles/styles.scss
+
+.leaflet-container {
+  height: 500px;
+  width: 80%; // Ajuste la largeur pour qu'elle ne prenne pas toute la page
+  margin: 20px auto; // Centre la carte horizontalement
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Ombre légère
 }
 
 .buttons-container {
   display: flex;
+  justify-content: center;
   gap: 10px;
-  margin: 10px;
+  margin: 20px auto; // Ajout d'un espace entre le texte d'accueil, le header, et la carte
 }
 
 .buttons-container button {

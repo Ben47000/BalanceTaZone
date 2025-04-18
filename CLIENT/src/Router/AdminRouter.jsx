@@ -1,11 +1,16 @@
 import { Routes, Route } from "react-router-dom";
-
-import Header from "../Components/admin/Partial/Header.jsx";
+import HeaderAdmin from "../Components/admin/Partial/HeaderAdmin";
+import Dashboard from "../Components/admin/Dashboard"; // ✅ Vérifie que le fichier est bien placé
 
 function AdminRouter() {
-    retunr (
-        <Header/>
-    )
+  return (
+    <>
+      <HeaderAdmin />
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </>
+  );
 }
 
 export default AdminRouter;

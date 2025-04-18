@@ -123,31 +123,24 @@ button {
   font-size: 1.5rem;
   color: #3C8D40;
 }
-.header .header-container .header-logo {
-  width: 150px;
-  max-height: 60px;
-}
 .header .header-container nav {
   display: flex;
   gap: 16px;
 }
-@media (min-width: 576px) {
-  .header .header-container nav {
-    display: block;
-  }
-}
 
-.map-container {
-  height: 100vh;
+.leaflet-container {
+  height: 500px;
   width: 80%;
-  margin: 20px;
-  text-align: center;
+  margin: 20px auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .buttons-container {
   display: flex;
+  justify-content: center;
   gap: 10px;
-  margin: 10px;
+  margin: 20px auto;
 }
 
 .buttons-container button {
@@ -250,7 +243,7 @@ button {
   position: relative;
   width: 30px;
   height: 25px;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
@@ -258,6 +251,7 @@ button {
   background: transparent;
   cursor: pointer;
   padding: 0;
+  z-index: 20;
 }
 .burger-button span {
   width: 100%;
@@ -278,20 +272,6 @@ button {
   position: absolute;
 }
 
-.nav.burger {
-  display: flex;
-  flex-direction: column;
-  background-color: #3C8D40;
-  padding: 8px;
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  z-index: 10;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-}
-
 .nav.screen {
   display: flex;
   flex-direction: row;
@@ -300,10 +280,42 @@ button {
   gap: 16px;
 }
 
+.nav.burger {
+  display: flex;
+  flex-direction: column;
+  background-color: #3C8D40;
+  padding: 8px;
+  position: absolute;
+  top: 60px;
+  right: 0;
+  left: 0;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.nav.hidden {
+  display: none !important;
+}
+
+@media screen and (max-width: 600px) {
+  .burger-button {
+    display: flex;
+  }
+  .nav.screen {
+    display: none !important;
+  }
+  .nav.burger {
+    display: none;
+  }
+  .nav.burger.active {
+    display: flex;
+  }
+}
 .footerStyle {
   background-color: #F8F8F8;
   color: #333333;
-  padding: 24px 0;
+  padding: 24px;
   text-align: center;
 }
 .footerStyle .containerStyle {
@@ -392,4 +404,273 @@ button {
 
 .add-button-container button:nth-child(2):hover {
   background-color: #5a6268; /* Couleur plus foncée au survol pour le rapport */
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 20px auto;
+}
+.welcome-container h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+.welcome-container p {
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* 📌 Styles généraux du profil */
+.profil-container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profil-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #007bff;
+}
+
+.profil-email {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.profil-subtitle {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.profil-loading {
+  text-align: center;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.profil-error {
+  text-align: center;
+  font-weight: bold;
+  color: red;
+}
+
+.profil-no-event {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* 📌 Style du tableau */
+.profil-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profil-table th, .profil-table td {
+  border: 1px solid #dee2e6;
+  padding: 12px;
+  text-align: left;
+}
+
+.profil-table th {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+.profil-table tr:nth-child(even) {
+  background: #f8f9fa;
+}
+
+.profil-table tr:hover {
+  background: #e9ecef;
+}
+
+/* 📌 Style des boutons */
+.delete-button {
+  background: #dc3545;
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.delete-button:hover {
+  background: #c82333;
+}
+
+/* Boutons ajoutés dans le style global */
+.add-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.add-button-container button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+}
+
+.add-button-container button:hover {
+  background-color: #0056b3;
+}
+
+.add-button-container button:nth-child(2) {
+  background-color: #6c757d;
+}
+
+.add-button-container button:nth-child(2):hover {
+  background-color: #5a6268;
+}
+
+/* ✅ Styles pour le Dashboard Admin */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.admin-section {
+  margin-bottom: 40px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.admin-table th, .admin-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.admin-table th {
+  background-color: #333;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+/* Message d'erreur */
+.error-message {
+  text-align: center;
+  color: red;
+  font-weight: bold;
+}
+
+/* ✅ Sidebar Menu Toggle (Mobile First) */
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background-color: #222;
+  padding-top: 20px;
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(-100%);
+  z-index: 1000;
+}
+
+.admin-sidebar.open {
+  transform: translateX(0);
+}
+
+.admin-sidebar a {
+  display: block;
+  padding: 15px;
+  color: white;
+  text-decoration: none;
+  border-bottom: 1px solid #333;
+  text-align: center;
+}
+
+.admin-sidebar a:hover {
+  background-color: #007bff;
+}
+
+.menu-toggle {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1100;
+}
+
+@media screen and (min-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(0);
+    width: 200px;
+  }
+  .admin-sidebar a {
+    text-align: left;
+  }
+  .menu-toggle {
+    display: none;
+  }
+  .dashboard-container {
+    margin-left: 220px;
+  }
 }/*# sourceMappingURL=main.css.map */

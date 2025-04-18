@@ -8,15 +8,14 @@ const menuSlice = createSlice({
   name: "menu",
   initialState,
   reducers: {
-    toggleMenu: (state, action) => {
-      if (typeof action.payload === "boolean") {
-        state.isOpen = action.payload; // Si un état est passé, on l'utilise directement
-      } else {
-        state.isOpen = !state.isOpen; // Sinon, on inverse l'état actuel
-      }
+    toggleMenu: (state) => {
+      state.isOpen = !state.isOpen; // 🔄 Inversion de l'état
+    },
+    closeMenu: (state) => {
+      state.isOpen = false; // ❌ Forcer la fermeture
     },
   },
 });
 
-export const { toggleMenu } = menuSlice.actions;
+export const { toggleMenu, closeMenu } = menuSlice.actions;
 export default menuSlice.reducer;

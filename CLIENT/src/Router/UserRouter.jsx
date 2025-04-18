@@ -7,8 +7,7 @@ import Signup from "../Components/auth/Signup.jsx"; // Import du composant Signu
 import Login from "../Components/auth/Login.jsx"; // Import du composant Login
 import Profil from "../Components/user/Profil.jsx";
 import ContactPage from "../Components/user/ContactPage.jsx";
-import TermsOfService
- from "../Components/user/ThermsOfServices.jsx";
+import TermsOfService from "../Components/user/ThermsOfServices.jsx";
 function UserRouter() {
   return (
     <>

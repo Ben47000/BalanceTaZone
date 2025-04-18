@@ -27,21 +27,12 @@
       color: variable.$primary-color;
     }
 
-    // Styles du logo
-    .header-logo {
-      width: 150px;
-      max-height: 60px;
-    }
-
+    
     // Styles du nav dans le header
     nav {
       display: flex;
       gap: variable.$spacing-medium;
 
-      // Utilisation du mixin pour la réactivité
-      @include mixin.media-breakpoints-up('mobile') {
-        display: block;
-      }
     }
   }
 }

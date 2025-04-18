@@ -1,0 +1,175 @@
+/* 📌 Styles généraux du profil */
+.profil-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profil-title {
+    text-align: center;
+    font-size: 2rem;
+    color: #007bff;
+}
+
+.profil-email {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.profil-subtitle {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.profil-loading {
+    text-align: center;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.profil-error {
+    text-align: center;
+    font-weight: bold;
+    color: red;
+}
+
+.profil-no-event {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* 📌 Style du tableau (Par défaut : Mobile First = Affichage en liste) */
+.profil-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.profil-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    display: block;
+}
+
+.profil-table thead {
+    display: none; /* Cache l'en-tête en mode mobile */
+}
+
+.profil-table tr {
+    display: block;
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.profil-table td {
+    display: block;
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+    position: relative;
+    padding-left: 50%;
+}
+
+.profil-table td:last-child {
+    border-bottom: none;
+}
+
+/* Ajoute un titre pour chaque cellule en mode mobile */
+.profil-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 40%;
+    white-space: nowrap;
+}
+
+/* 📌 Mode Desktop */
+@media (min-width: 768px) {
+    .profil-table {
+        display: table;
+    }
+
+    .profil-table thead {
+        display: table-header-group;
+    }
+
+    .profil-table tr {
+        display: table-row;
+        margin-bottom: 0;
+        border-radius: 0;
+        padding: 0;
+    }
+
+    .profil-table td {
+        display: table-cell;
+        padding: 12px;
+        border-bottom: none;
+        text-align: left;
+    }
+
+    .profil-table td::before {
+        display: none;
+    }
+}
+
+/* 📌 Style des boutons */
+.delete-button {
+    background: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+}
+
+.delete-button:hover {
+    background: #c82333;
+}
+
+.add-button-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.add-button-container button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+.add-button-container button:hover {
+    background-color: #0056b3;
+}
+
+.add-button-container button:nth-child(2) {
+    background-color: #6c757d;
+}
+
+.add-button-container button:nth-child(2):hover {
+    background-color: #5a6268;
+}
